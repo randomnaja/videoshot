@@ -30,6 +30,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicLong;
 
 
 public class Main {
@@ -126,19 +127,58 @@ public class Main {
         }
     }
 
-    public static void main(String[] args) throws Exception {
-        // create custom listeners
-        MyVideoListener myVideoListener = new MyVideoListener(300, 200);
-        Resizer resizer = new Resizer(300, 200);
+    public static void mainWORK(String[] args) throws Exception {
+
+        final AtomicBoolean isWrite = new AtomicBoolean(false);
+        final long PERIOD1SECOND = 1000000;
+        final AtomicLong lastPeriod = new AtomicLong(PERIOD1SECOND);
+        //final IMediaReader reader = ToolFactory.makeReader("/home/tone/ToneDropbox/Dropbox/small.mp4");
+        final IMediaReader reader = ToolFactory.makeReader("/home/tone/Musics/MV/Zidane All in the touch - Hala Madrid I.mp4");
+
+        class AddStreamListenner extends MediaToolAdapter {
+            @Override
+            public void onAddStream(IAddStreamEvent event) {
+                super.onAddStream(event);
+            }
+        }
+        final AddStreamListenner addStreamListenner = new AddStreamListenner();
+
+        class VideoListener extends MediaToolAdapter {
+
+            @Override
+            public void onVideoPicture(IVideoPictureEvent event) {
+                if (event.getTimeStamp() >= lastPeriod.get() && event.getImage() != null) {
+                    lastPeriod.set(lastPeriod.get() + PERIOD1SECOND);
+
+                    System.out.println("Write image " + event.getTimeStamp());
+                    BufferedImage image = event.getImage();
+                    try {
+                        Sanselan.writeImage(image, new File("/tmp/ss" + event.getTimeStamp() + ".png"),
+                                ImageFormat.IMAGE_FORMAT_PNG, null);
+                    } catch (ImageWriteException | IOException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+
+                if (event.getTimeStamp() >= 4000000L && !isWrite.get()) {
+                    isWrite.set(true);
+
+                    IMediaWriter writer = ToolFactory.makeWriter("/tmp/cut.mp4", reader);
+                    this.addListener(writer);
+                    writer.addListener(addStreamListenner);
+                }
+                super.onVideoPicture(event);
+            }
+        }
+
+        VideoListener videoListener = new VideoListener();
 
         // reader
-        final IMediaReader reader = ToolFactory.makeReader("/home/tone/ENC/ToneDropbox/Dropbox/small.mp4");
-        reader.addListener(resizer);
+        reader.addListener(videoListener);
 
-        // writer
-        IMediaWriter writer = ToolFactory.makeWriter("/tmp/cut.mp4", reader);
-        resizer.addListener(writer);
-        writer.addListener(myVideoListener);
+//        IMediaWriter writer = ToolFactory.makeWriter("/tmp/cut.mp4", reader);
+//        videoListener.addListener(writer);
+//        writer.addListener(addStreamListenner);
 
         // show video when encoding
         //reader.addListener(ToolFactory.makeViewer(true));
@@ -164,7 +204,7 @@ public class Main {
             if (event.getTimeStamp() >= 4000000L && !updateFile.get()) {
                 System.out.println("write");
                 updateFile.set(true);
-                this.addListener(ToolFactory.makeWriter("/tmp/cut.mp4", reader));
+                //this.addListener(ToolFactory.makeWriter("/tmp/cut.mp4", reader));
             }
             System.out.println("ON video " + event.getTimeStamp());
 
@@ -207,8 +247,8 @@ public class Main {
     }
 
     @SuppressWarnings("deprecation")
-    public static void main2(String[] args) throws IOException, ImageWriteException {
-        String filename = "/home/tone/ENC/ToneDropbox/Dropbox/small.mp4";
+    public static void main1(String[] args) throws IOException, ImageWriteException {
+        String filename = "/home/tone/Musics/MV/Zidane All in the touch - Hala Madrid I.mp4";
 
         // Let's make sure that we can actually convert video pixel formats.
         if (!IVideoResampler.isSupported(
@@ -388,7 +428,7 @@ public class Main {
                             System.out.println("Print image of time : " + picture.getFormattedTimeStamp());
                             // And finally, convert the BGR24 to an Java buffered image
                             BufferedImage javaImage = Utils.videoPictureToImage(newPic);
-                            Sanselan.writeImage(javaImage, new File("/tmp/" + picture.getFormattedTimeStamp()),
+                            Sanselan.writeImage(javaImage, new File("/tmp/ss_" + picture.getFormattedTimeStamp() + ".png"),
                                     ImageFormat.IMAGE_FORMAT_PNG, new HashMap());
                         }
 
