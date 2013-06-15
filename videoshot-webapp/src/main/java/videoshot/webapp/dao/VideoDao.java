@@ -1,6 +1,7 @@
 package videoshot.webapp.dao;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
@@ -22,6 +23,17 @@ public class VideoDao {
                 new Object[]{}, new VideoRowMapper());
 
         return res;
+    }
+
+    public VideoModel findById(long id) {
+        try {
+            VideoModel videoModel = jdbcTemplate.getJdbcOperations().queryForObject("SELECT * FROM video WHERE id = ?",
+                    new Object[]{id}, new VideoRowMapper());
+
+            return videoModel;
+        } catch (EmptyResultDataAccessException e) {
+            return null;
+        }
     }
 
     public VideoModel findByPath(String sourceVideoPath) {

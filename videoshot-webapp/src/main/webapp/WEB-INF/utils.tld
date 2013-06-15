@@ -25,4 +25,10 @@
         <function-signature>java.io.File getFileByPath(java.lang.String)</function-signature>
     </function>
 
+    <function>
+        <name>formatMs</name>
+        <function-class>videoshot.webapp.CommonsUtil</function-class>
+        <function-signature>java.lang.String formatMillis(long)</function-signature>
+    </function>
+
 </taglib>

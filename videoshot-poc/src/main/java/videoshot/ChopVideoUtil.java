@@ -47,7 +47,7 @@ public class ChopVideoUtil {
                     writer.addListener(addStreamListenner);
                 }
 
-                if (event.getTimeStamp() >= (startTimeMicroSec + 5000000 ) && !isStopWrite.get()) {
+                if (event.getTimeStamp() >= (endTimeMicroSec ) && !isStopWrite.get()) {
                     System.out.println("Write media stop at " + event.getTimeStamp());
                     isStopWrite.set(true);
 

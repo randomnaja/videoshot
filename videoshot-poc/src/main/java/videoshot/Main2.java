@@ -9,6 +9,8 @@ import org.springframework.jdbc.core.PreparedStatementCreator;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 
+import java.awt.AlphaComposite;
+import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -50,8 +52,18 @@ public class Main2 {
                             public void write(BufferedImage image, long timeStampInMicroSec) {
                                 try {
                                     String imgPath = "/home/tone/Desktop/video/ss_" + timeStampInMicroSec + ".png";
-                                    Sanselan.writeImage(image,
-                                            new File(imgPath),
+
+                                    double ratio = (double) image.getWidth() / 320.0;
+                                    int newHeight = (int) (image.getHeight() * ratio);
+                                    // resize buffered image
+                                    final BufferedImage bufferedImage =
+                                            new BufferedImage(320, newHeight, BufferedImage.TYPE_INT_RGB);
+                                    final Graphics2D graphics2D = bufferedImage.createGraphics();
+                                    graphics2D.setComposite(AlphaComposite.Src);
+                                    graphics2D.drawImage(image, 0, 0, 320, newHeight, null);
+                                    graphics2D.dispose();
+
+                                    Sanselan.writeImage(bufferedImage, new File(imgPath),
                                             ImageFormat.IMAGE_FORMAT_PNG, null);
 
                                     jdbcTemplate.getJdbcOperations().update("INSERT INTO screenshot (timescene, imagepath, video_id) " +
