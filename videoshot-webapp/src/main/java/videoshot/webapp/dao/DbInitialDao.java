@@ -1,5 +1,7 @@
 package videoshot.webapp.dao;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
@@ -8,6 +10,8 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public class DbInitialDao implements InitializingBean {
+
+    private Logger log = LoggerFactory.getLogger(this.getClass());
 
     @Autowired
     private NamedParameterJdbcTemplate jdbcTemplate;
@@ -19,13 +23,22 @@ public class DbInitialDao implements InitializingBean {
         try {
             jdbcTemplate.getJdbcOperations().execute("SELECT COUNT(*) FROM video");
         } catch (DataAccessException e) {
+            log.info("Creating table video");
             createVideoTable();
         }
 
         try {
             jdbcTemplate.getJdbcOperations().execute("SELECT COUNT(*) FROM screenshot");
         } catch (DataAccessException e) {
+            log.info("Creating table screenshot");
             createScreenshotTable();
+        }
+
+        try {
+            jdbcTemplate.getJdbcOperations().execute("SELECT COUNT(*) FROM uploadvideo");
+        } catch (DataAccessException e) {
+            log.info("Creating table uploadvideo");
+            createUploadVideoTable();
         }
     }
 
@@ -40,6 +53,17 @@ public class DbInitialDao implements InitializingBean {
                 "imagepath varchar(2048), video_id BIGINT NOT NULL, PRIMARY KEY (id), " +
                 "Foreign Key (video_id) references video(id) on delete cascade on update cascade)" +
                 " ENGINE=INNODB  CHARSET=UTF8 COLLATE utf8_general_ci";
+
+        jdbcTemplate.getJdbcOperations().execute(sql);
+    }
+
+    private void createUploadVideoTable() {
+        String sql = "CREATE TABLE uploadvideo (id BIGINT AUTO_INCREMENT NOT NULL, " +
+                "path VARCHAR(1024) NOT NULL, " +
+                "title VARCHAR(1024) NULL, " +
+                "isuploaded INT NOT NULL DEFAULT 0, " +
+                " PRIMARY KEY (id) " +
+                ") ENGINE=INNODB  CHARSET=UTF8 COLLATE utf8_general_ci";
 
         jdbcTemplate.getJdbcOperations().execute(sql);
     }

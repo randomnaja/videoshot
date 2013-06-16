@@ -3,7 +3,7 @@
 
     <parent>
         <groupId>videoshot</groupId>
-        <artifactId>videoshot-pom</artifactId>
+        <artifactId>videoshot</artifactId>
         <version>1.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>

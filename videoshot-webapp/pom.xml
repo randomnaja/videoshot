@@ -5,7 +5,7 @@
 
     <parent>
         <groupId>videoshot</groupId>
-        <artifactId>videoshot-pom</artifactId>
+        <artifactId>videoshot</artifactId>
         <version>1.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
@@ -267,7 +267,13 @@
             <artifactId>videoshot-poc</artifactId>
             <version>${project.version}</version>
         </dependency>
-        
+
+        <dependency>
+            <groupId>com.hazelcast</groupId>
+            <artifactId>hazelcast</artifactId>
+            <version>2.6</version>
+        </dependency>
+
     </dependencies>
 
 </project>

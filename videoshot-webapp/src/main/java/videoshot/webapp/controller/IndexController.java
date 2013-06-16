@@ -9,9 +9,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import videoshot.ChopVideoUtil;
+import videoshot.webapp.dao.UploadVideoDao;
 import videoshot.webapp.dao.VideoDao;
+import videoshot.webapp.job.UploadVideoJob;
 import videoshot.webapp.model.ScreenshotModel;
+import videoshot.webapp.model.UploadVideoModel;
 import videoshot.webapp.model.VideoModel;
+import videoshot.webapp.service.HazelcastEntryService;
 
 import java.io.File;
 import java.io.IOException;
@@ -24,6 +28,12 @@ public class IndexController {
 
     @Autowired
     private VideoDao videoDao;
+
+    @Autowired
+    private UploadVideoDao uploadVideoDao;
+
+    @Autowired
+    private HazelcastEntryService hazelcastEntryService;
 
     @RequestMapping("/index.html")
     public String entry(Model model) {
@@ -78,7 +88,29 @@ public class IndexController {
         ChopVideoUtil.chopVideo(startMicroSec, endMicroSec, videoFile, tempOutputFile);
         long finish = (System.currentTimeMillis() - start);
 
+        // Insert to upload video
+        UploadVideoModel uploadVideoModel = new UploadVideoModel();
+        uploadVideoModel.setPath(tempOutputFile.getAbsolutePath());
+        uploadVideoModel.setUploaded(false);
+        uploadVideoDao.save(uploadVideoModel);
+
         return "<h2>Finish!!! in (ms)" + finish + "</h2>" +
                 "<h3>File is at " + tempOutputFile + "</h3>";
+    }
+
+    @RequestMapping(value = "/upload.html")
+    @ResponseBody
+    public String uploadVideo(@RequestParam(value = "id", required = true) Long uploadVideoId)
+            throws InterruptedException {
+
+        UploadVideoModel byId = uploadVideoDao.findById(uploadVideoId);
+
+        if (byId == null) {
+            throw new IllegalArgumentException("upload video id = " + uploadVideoId + " is not found");
+        }
+
+        hazelcastEntryService.getUploadVideoQueue().put(new UploadVideoJob(uploadVideoId));
+
+        return "<h2>Upload job added !!!" + byId.getPath() + "</h2>";
     }
 }

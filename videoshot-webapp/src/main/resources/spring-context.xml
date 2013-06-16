@@ -15,7 +15,8 @@
     <context:annotation-config/>
 
     <context:component-scan base-package="videoshot.webapp.dao
-        videoshot.webapp.controller"/>
+        videoshot.webapp.controller
+        videoshot.webapp.service"/>
 
     <!--<jdbc:embedded-database id="dataSource"/>-->
 

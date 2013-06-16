@@ -3,11 +3,11 @@
 
     <modelVersion>4.0.0</modelVersion>
     <groupId>videoshot</groupId>
-    <artifactId>videoshot-pom</artifactId>
+    <artifactId>videoshot</artifactId>
     <version>1.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
-    <name>videoshot-pom</name>
+    <name>videoshot</name>
     <url>http://maven.apache.org</url>
 
     <properties>

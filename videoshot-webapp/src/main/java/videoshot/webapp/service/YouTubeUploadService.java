@@ -13,6 +13,8 @@ import com.google.gdata.data.youtube.VideoEntry;
 import com.google.gdata.data.youtube.YouTubeMediaGroup;
 import com.google.gdata.data.youtube.YouTubeNamespace;
 import com.google.gdata.util.ServiceException;
+import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
@@ -21,7 +23,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 
 @Service
-public class YouTubeUploadService {
+public class YouTubeUploadService implements InitializingBean {
 
     public static final String DEFAULT_USER = "default";
 
@@ -38,6 +40,18 @@ public class YouTubeUploadService {
 
     private String mimeType = "video/mp4";
 
+    @Autowired
+    private CredentialProperties credentialProperties;
+
+    @Override
+    public void afterPropertiesSet() throws Exception {
+        developerKey = credentialProperties.getDeveloperKey();
+        oAuthToken = credentialProperties.getOAuthToken();
+        oAuthTokenSecret = credentialProperties.getOAuthTokenSecret();
+        oAuthConsumerKey = credentialProperties.getOAuthConsumerKey();
+        oAuthConsumerSecret = credentialProperties.getOAuthConsumerSecret();
+    }
+
     public void uploadVideo(File videoFile, String videoTitle) {
 
         YouTubeService service = new YouTubeService(applicationName, developerKey);
@@ -46,7 +60,7 @@ public class YouTubeUploadService {
         oauthParam.setOAuthToken(oAuthToken);
         oauthParam.setOAuthTokenSecret(oAuthTokenSecret);
         oauthParam.setOAuthConsumerKey(oAuthConsumerKey);
-        oauthParam.setOAuthConsumerSecret(oAuthTokenSecret);
+        oauthParam.setOAuthConsumerSecret(oAuthConsumerSecret);
         oauthParam.setScope("http://gdata.youtube.com");
 
         try {
