@@ -35,6 +35,7 @@ public class JobRunnerService implements ApplicationListener {
             jobControllerExec.submit(new JobRunnerController(hazelcastEntryService.getChopVideoQueue()));
             jobControllerExec.submit(new JobRunnerController(hazelcastEntryService.getUploadVideoQueue()));
         } else if (event instanceof ContextClosedEvent) {
+            //TODO Tone.6/16/13, re-test this
             // stop the timer
             jobControllerExec.shutdown();
             try {
